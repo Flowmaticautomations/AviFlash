@@ -23,8 +23,8 @@ interface PendingCard {
   answerImages: StagedImage[];
 }
 
-function subjectLabel(name: string, year: string | null) {
-  return year ? `${name} ${year}` : name;
+function subjectLabel(name: string) {
+  return name;
 }
 
 export default function NewCard() {
@@ -238,7 +238,7 @@ export default function NewCard() {
     <ScreenContainer>
       <ScreenTitle>New Card</ScreenTitle>
       <ScreenSubtitle>
-        {subjectLabel(activeSubject.name, activeSubject.academic_year)} — build a card set, then add cards.
+        {subjectLabel(activeSubject.name)} — build a card set, then add cards.
       </ScreenSubtitle>
 
       {confirmingLeave ? (

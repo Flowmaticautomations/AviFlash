@@ -9,7 +9,6 @@ export default function ProfileCompletion() {
   const [firstName, setFirstName] = useState(profile?.first_name ?? '');
   const [surname, setSurname] = useState(profile?.surname ?? '');
   const [phone, setPhone] = useState(profile?.phone ?? '');
-  const [gradeOrYear, setGradeOrYear] = useState(profile?.grade_or_year ?? '');
   const [country, setCountry] = useState(profile?.country ?? 'South Africa');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -21,7 +20,6 @@ export default function ProfileCompletion() {
     if (!firstName.trim()) next.firstName = 'Name is required.';
     if (!surname.trim()) next.surname = 'Surname is required.';
     if (!phone.trim()) next.phone = 'Phone number is required.';
-    if (!gradeOrYear.trim()) next.gradeOrYear = 'Grade or year is required.';
     if (!country.trim()) next.country = 'Country is required.';
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -38,7 +36,6 @@ export default function ProfileCompletion() {
         first_name: firstName.trim(),
         surname: surname.trim(),
         phone: phone.trim(),
-        grade_or_year: gradeOrYear.trim(),
         country: country.trim(),
         profile_completed: true,
       })
@@ -69,13 +66,6 @@ export default function ProfileCompletion() {
         onChangeText={setPhone}
         error={errors.phone}
         keyboardType="phone-pad"
-      />
-      <FormField
-        label="Grade or year of study"
-        value={gradeOrYear}
-        onChangeText={setGradeOrYear}
-        error={errors.gradeOrYear}
-        placeholder="e.g. Grade 10, 1st year"
       />
       <FormField label="Country" value={country} onChangeText={setCountry} error={errors.country} />
 

@@ -30,7 +30,7 @@ export default function Paywall() {
       <ScreenSubtitle>{message}</ScreenSubtitle>
 
       <Banner kind="info">
-        AV Flash subscriptions are activated by AV Flash directly — there&apos;s no in-app checkout yet. Email{' '}
+        AviFlash subscriptions are activated by AviFlash directly — there&apos;s no in-app checkout yet. Email{' '}
         demo@aviflash.co.za (temporary contact) to activate or renew your subscription, and you&apos;ll be
         studying again as soon as it&apos;s confirmed.
       </Banner>

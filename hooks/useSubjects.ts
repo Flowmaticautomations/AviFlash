@@ -32,11 +32,15 @@ export function useSubjects() {
     refresh();
   }, [refresh]);
 
-  async function createSubject(name: string, academicYear: string | null) {
+  // academic_year is no longer collected anywhere in the app (product
+  // decision -- school year/grade tracking was dropped). The column stays
+  // (existing rows may still have an old value), but nothing writes to it
+  // going forward.
+  async function createSubject(name: string) {
     if (!session) throw new Error('Not signed in');
     const { data, error } = await supabase
       .from('subjects')
-      .insert({ user_id: session.user.id, name, academic_year: academicYear })
+      .insert({ user_id: session.user.id, name, academic_year: null })
       .select()
       .single();
     if (error) throw error;
@@ -44,8 +48,8 @@ export function useSubjects() {
     return data;
   }
 
-  async function renameSubject(id: string, name: string, academicYear: string | null) {
-    const { error } = await supabase.from('subjects').update({ name, academic_year: academicYear }).eq('id', id);
+  async function renameSubject(id: string, name: string) {
+    const { error } = await supabase.from('subjects').update({ name }).eq('id', id);
     if (error) throw error;
     await refresh();
   }

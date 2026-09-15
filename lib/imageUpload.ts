@@ -1,5 +1,7 @@
+import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
+import { isImageDataValid } from './imageValidation';
 import { supabase } from './supabase';
 import type { Tables } from './database.types';
 
@@ -74,7 +76,16 @@ export async function uploadCardImage({
   const compressedUri = await compressImage(localUri);
   const path = storagePath(userId, flashcardId, side, sortOrder);
 
-  const arrayBuffer = await fetch(compressedUri).then((res) => res.arrayBuffer());
+  // Was fetch(compressedUri).then(res => res.arrayBuffer()) -- on this
+  // device/SDK combo that silently resolved to a tiny fixed-size error body
+  // (every upload landed as an identical 14-byte object in storage) instead
+  // of throwing, so a broken upload looked successful and just never
+  // rendered as an image later. expo-file-system's File reads the local
+  // file's real bytes directly, no network-fetch layer involved.
+  const arrayBuffer = await new File(compressedUri).arrayBuffer();
+  if (!isImageDataValid(arrayBuffer.byteLength)) {
+    throw new Error('Could not read the photo from your device — try picking it again.');
+  }
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, arrayBuffer, {
     contentType: 'image/jpeg',
   });
@@ -115,7 +126,13 @@ export async function getSignedUrl(path: string): Promise<string | null> {
   if (cached && cached.expiresAt > Date.now()) return cached.url;
 
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
-  if (error || !data) return null;
+  if (error || !data) {
+    // Was silently returning null here, with no way to tell "this image
+    // failed to sign" apart from "everything's fine". Logged now -- the
+    // caller still gets null either way and renders its own fallback UI.
+    console.error('getSignedUrl failed for', path, error?.message);
+    return null;
+  }
 
   signedUrlCache.set(path, { url: data.signedUrl, expiresAt: Date.now() + (SIGNED_URL_TTL_SECONDS - 60) * 1000 });
   return data.signedUrl;

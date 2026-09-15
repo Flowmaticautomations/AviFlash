@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Banner, FormField, LinkText, PrimaryButton, ScreenContainer, ScreenSubtitle, ScreenTitle } from '../components/ui';
+import { AUTH_REDIRECT_URL } from '../lib/authRedirect';
 import { supabase } from '../lib/supabase';
 import { isValidEmail } from '../lib/validation';
 
@@ -20,7 +21,9 @@ export default function ForgotPassword() {
     }
 
     setSubmitting(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim());
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: AUTH_REDIRECT_URL,
+    });
     setSubmitting(false);
 
     if (resetError) {

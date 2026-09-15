@@ -11,17 +11,25 @@ import {
   TextInputProps,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '../hooks/useThemeColors';
 
+// Every screen goes through here, so this is the one place a bottom safe-area
+// fix needs to live -- without it, the last button/link on any screen (login
+// link, back-to-dashboard, etc.) sits under Samsung's gesture/nav bar, since
+// the ScrollView's own padding has no idea it exists. SafeAreaProvider was
+// already wrapping the app (see app/_layout.tsx) but nothing was actually
+// reading from it.
 export function ScreenContainer({ children }: { children: ReactNode }) {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 + insets.bottom }]}
         keyboardShouldPersistTaps="handled"
       >
         {children}

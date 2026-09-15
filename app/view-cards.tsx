@@ -14,8 +14,8 @@ import { MAX_IMAGES_PER_SIDE, deleteCardImage, pickImages, uploadCardImage } fro
 
 const ARCHIVE_WARNING = 'Are you sure? This will remove it from your active cards.';
 
-function subjectLabel(name: string, year: string | null) {
-  return year ? `${name} ${year}` : name;
+function subjectLabel(name: string) {
+  return name;
 }
 
 export default function ViewCards() {
@@ -177,7 +177,7 @@ export default function ViewCards() {
   return (
     <ScreenContainer>
       <ScreenTitle>View Cards</ScreenTitle>
-      <ScreenSubtitle>{subjectLabel(activeSubject.name, activeSubject.academic_year)}</ScreenSubtitle>
+      <ScreenSubtitle>{subjectLabel(activeSubject.name)}</ScreenSubtitle>
 
       {!selectedDeck ? (
         <>
@@ -241,7 +241,7 @@ export default function ViewCards() {
                       style={[styles.subjectOption, { borderColor: colors.border }]}
                       disabled={deckActionBusy}
                     >
-                      <Text style={{ color: colors.text }}>{subjectLabel(subject.name, subject.academic_year)}</Text>
+                      <Text style={{ color: colors.text }}>{subjectLabel(subject.name)}</Text>
                     </Pressable>
                   ))
                 )}
@@ -275,14 +275,23 @@ export default function ViewCards() {
                   {cards.length} card(s)
                 </Text>
                 <View style={styles.actionsRow}>
-                  <Pressable onPress={startRenameDeck} style={styles.textAction}>
-                    <Text style={{ color: colors.tint }}>Rename</Text>
+                  <Pressable
+                    onPress={startRenameDeck}
+                    style={[styles.actionChip, { borderColor: colors.tint }]}
+                  >
+                    <Text style={[styles.actionChipText, { color: colors.tint }]}>Rename</Text>
                   </Pressable>
-                  <Pressable onPress={() => setMovingDeck(true)} style={styles.textAction}>
-                    <Text style={{ color: colors.tint }}>Move</Text>
+                  <Pressable
+                    onPress={() => setMovingDeck(true)}
+                    style={[styles.actionChip, { borderColor: colors.tint }]}
+                  >
+                    <Text style={[styles.actionChipText, { color: colors.tint }]}>Move</Text>
                   </Pressable>
-                  <Pressable onPress={() => setArchivingDeck(true)} style={styles.textAction}>
-                    <Text style={{ color: colors.accent }}>Archive</Text>
+                  <Pressable
+                    onPress={() => setArchivingDeck(true)}
+                    style={[styles.actionChip, { borderColor: colors.accent }]}
+                  >
+                    <Text style={[styles.actionChipText, { color: colors.accent }]}>Archive</Text>
                   </Pressable>
                 </View>
               </>
@@ -524,11 +533,11 @@ function CardRow({
           {card.answer_text ? <Text style={{ color: colors.muted, marginTop: 4 }}>{card.answer_text}</Text> : null}
           <ImageGallery images={answerImages} label="Answer images" variant="thumbnails" />
           <View style={styles.actionsRow}>
-            <Pressable onPress={onStartEdit} style={styles.textAction}>
-              <Text style={{ color: colors.tint }}>Edit</Text>
+            <Pressable onPress={onStartEdit} style={[styles.actionChip, { borderColor: colors.tint }]}>
+              <Text style={[styles.actionChipText, { color: colors.tint }]}>Edit</Text>
             </Pressable>
-            <Pressable onPress={onStartArchive} style={styles.textAction}>
-              <Text style={{ color: colors.accent }}>Archive</Text>
+            <Pressable onPress={onStartArchive} style={[styles.actionChip, { borderColor: colors.accent }]}>
+              <Text style={[styles.actionChipText, { color: colors.accent }]}>Archive</Text>
             </Pressable>
           </View>
         </>
@@ -557,13 +566,27 @@ const styles = StyleSheet.create({
   },
   actionsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 16,
+    columnGap: 10,
+    rowGap: 8,
     marginTop: 4,
   },
   textAction: {
-    paddingVertical: 4,
-    paddingHorizontal: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+  },
+  actionChip: {
+    flexShrink: 0,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  actionChipText: {
+    flexShrink: 0,
+    fontWeight: '600',
+    fontSize: 13,
   },
   confirmButton: {
     borderRadius: 8,

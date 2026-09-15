@@ -56,11 +56,7 @@ export default function Dashboard() {
         >
           <Text style={[styles.subjectLabel, { color: colors.muted }]}>Subject</Text>
           <Text style={[styles.subjectName, { color: colors.text }]}>
-            {currentSubject
-              ? currentSubject.academic_year
-                ? `${currentSubject.name} ${currentSubject.academic_year}`
-                : currentSubject.name
-              : 'Loading…'}
+            {currentSubject ? currentSubject.name : 'Loading…'}
           </Text>
           <Text style={[styles.subjectChange, { color: colors.tint }]}>Change or manage subjects</Text>
         </Pressable>

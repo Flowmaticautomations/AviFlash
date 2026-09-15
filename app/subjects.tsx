@@ -7,7 +7,7 @@ import { useActiveSubject } from '../hooks/useActiveSubject';
 import { Subject, useSubjects } from '../hooks/useSubjects';
 
 function subjectLabel(subject: Subject) {
-  return subject.academic_year ? `${subject.name} ${subject.academic_year}` : subject.name;
+  return subject.name;
 }
 
 export default function Subjects() {
@@ -17,13 +17,11 @@ export default function Subjects() {
   const { activeSubjectId, setActiveSubjectId } = useActiveSubject();
 
   const [newName, setNewName] = useState('');
-  const [newYear, setNewYear] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [editYear, setEditYear] = useState('');
   const [saving, setSaving] = useState(false);
 
   const [archivingId, setArchivingId] = useState<string | null>(null);
@@ -36,10 +34,9 @@ export default function Subjects() {
     }
     setCreating(true);
     try {
-      const created = await createSubject(newName.trim(), newYear.trim() || null);
+      const created = await createSubject(newName.trim());
       if (created && !activeSubjectId) setActiveSubjectId(created.id);
       setNewName('');
-      setNewYear('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create subject.');
     } finally {
@@ -50,14 +47,13 @@ export default function Subjects() {
   function startEdit(subject: Subject) {
     setEditingId(subject.id);
     setEditName(subject.name);
-    setEditYear(subject.academic_year ?? '');
   }
 
   async function handleSaveEdit(id: string) {
     if (!editName.trim()) return;
     setSaving(true);
     try {
-      await renameSubject(id, editName.trim(), editYear.trim() || null);
+      await renameSubject(id, editName.trim());
       setEditingId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save changes.');
@@ -75,14 +71,13 @@ export default function Subjects() {
   return (
     <ScreenContainer>
       <ScreenTitle>Subjects</ScreenTitle>
-      <ScreenSubtitle>Tap a subject to make it active. Name + year, e.g. &ldquo;Geography 2026&rdquo;.</ScreenSubtitle>
+      <ScreenSubtitle>Tap a subject to make it active.</ScreenSubtitle>
 
       {error ? <Banner kind="error">{error}</Banner> : null}
 
       <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <Text style={[styles.cardHeading, { color: colors.text }]}>Add a subject</Text>
         <FormField label="Name" value={newName} onChangeText={setNewName} placeholder="e.g. Geography" />
-        <FormField label="Year (optional)" value={newYear} onChangeText={setNewYear} placeholder="e.g. 2026" />
         <PrimaryButton title="Add subject" onPress={handleCreate} loading={creating} />
       </View>
 
@@ -105,9 +100,8 @@ export default function Subjects() {
               ]}
             >
               {isEditing ? (
-                <View style={{ gap: 8 }}>
+                <View style={{ gap: 8, flex: 1 }}>
                   <FormField label="Name" value={editName} onChangeText={setEditName} />
-                  <FormField label="Year" value={editYear} onChangeText={setEditYear} />
                   <View style={styles.rowActions}>
                     <PrimaryButton title="Save" onPress={() => handleSaveEdit(subject.id)} loading={saving} />
                     <Pressable onPress={() => setEditingId(null)} style={styles.textAction}>
@@ -135,18 +129,24 @@ export default function Subjects() {
                 </View>
               ) : (
                 <>
-                  <Pressable style={{ flex: 1 }} onPress={() => setActiveSubjectId(subject.id)}>
-                    <Text style={[styles.rowTitle, { color: colors.text }]}>
+                  <Pressable style={styles.rowTitleWrap} onPress={() => setActiveSubjectId(subject.id)}>
+                    <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={2}>
                       {isActive ? '✓ ' : ''}
                       {subjectLabel(subject)}
                     </Text>
                   </Pressable>
                   <View style={styles.rowActions}>
-                    <Pressable onPress={() => startEdit(subject)} style={styles.textAction}>
-                      <Text style={{ color: colors.tint }}>Edit</Text>
+                    <Pressable
+                      onPress={() => startEdit(subject)}
+                      style={[styles.actionChip, { borderColor: colors.tint }]}
+                    >
+                      <Text style={[styles.actionChipText, { color: colors.tint }]}>Edit</Text>
                     </Pressable>
-                    <Pressable onPress={() => setArchivingId(subject.id)} style={styles.textAction}>
-                      <Text style={{ color: colors.accent }}>Archive</Text>
+                    <Pressable
+                      onPress={() => setArchivingId(subject.id)}
+                      style={[styles.actionChip, { borderColor: colors.accent }]}
+                    >
+                      <Text style={[styles.actionChipText, { color: colors.accent }]}>Archive</Text>
                     </Pressable>
                   </View>
                 </>
@@ -182,7 +182,15 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
+    rowGap: 8,
+  },
+  rowTitleWrap: {
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: '55%',
+    marginRight: 8,
   },
   rowTitle: {
     fontSize: 15,
@@ -190,12 +198,27 @@ const styles = StyleSheet.create({
   },
   rowActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 16,
+    flexShrink: 0,
+    columnGap: 10,
+    rowGap: 8,
   },
   textAction: {
-    paddingVertical: 4,
-    paddingHorizontal: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+  },
+  actionChip: {
+    flexShrink: 0,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  actionChipText: {
+    flexShrink: 0,
+    fontWeight: '600',
+    fontSize: 13,
   },
   confirmButton: {
     borderRadius: 8,

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text } from 'react-native';
 import {
   Banner,
@@ -25,6 +25,7 @@ export default function Login() {
   const router = useRouter();
   const colors = useThemeColors();
   const quote = useMemo(() => getRandomQuote(), []);
+  const { justRegistered } = useLocalSearchParams<{ justRegistered?: string }>();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,6 +62,11 @@ export default function Login() {
       <ScreenTitle>Welcome back</ScreenTitle>
       <ScreenSubtitle>{`“${quote}”`}</ScreenSubtitle>
 
+      {justRegistered ? (
+        <Banner kind="success">
+          Check your email to confirm your account, then log in to finish setting up your profile.
+        </Banner>
+      ) : null}
       {banner ? <Banner kind="error">{banner}</Banner> : null}
 
       <FormField

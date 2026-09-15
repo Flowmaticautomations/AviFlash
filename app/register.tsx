@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Banner, FormField, LinkText, PrimaryButton, ScreenContainer, ScreenSubtitle, ScreenTitle } from '../components/ui';
 import { useAuth } from '../lib/auth';
+import { AUTH_REDIRECT_URL } from '../lib/authRedirect';
 import { supabase } from '../lib/supabase';
 import { isValidEmail, isValidPhone, passwordIssue } from '../lib/validation';
 
@@ -14,8 +15,6 @@ export default function Register() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [birthYear, setBirthYear] = useState('');
-  const [gradeOrYear, setGradeOrYear] = useState('');
   const [country, setCountry] = useState('South Africa');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -32,8 +31,6 @@ export default function Register() {
     else if (!isValidEmail(email)) next.email = 'Enter a valid email address.';
     const pwIssue = passwordIssue(password);
     if (pwIssue) next.password = pwIssue;
-    if (!gradeOrYear.trim()) next.gradeOrYear = 'Grade or year is required.';
-    if (birthYear.trim() && !/^\d{4}$/.test(birthYear.trim())) next.birthYear = 'Enter a 4-digit year.';
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -46,6 +43,7 @@ export default function Register() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: { emailRedirectTo: AUTH_REDIRECT_URL },
     });
 
     if (error) {
@@ -58,12 +56,14 @@ export default function Register() {
       // Email confirmation is on for this project — no session yet, so the
       // profile can't be updated from here (RLS needs an authenticated
       // session). The rest of these fields get collected again on first
-      // login via the profile-completion screen.
-      setBanner({
-        kind: 'success',
-        text: 'Check your email to confirm your account, then log in to finish setting up your profile.',
-      });
+      // login via the profile-completion screen. Send the user back to
+      // Login rather than leaving them stuck on this form — the message
+      // carries over as a banner there.
       setSubmitting(false);
+      router.replace({
+        pathname: '/login',
+        params: { justRegistered: '1' },
+      });
       return;
     }
 
@@ -73,9 +73,7 @@ export default function Register() {
         first_name: firstName.trim(),
         surname: surname.trim(),
         phone: phone.trim(),
-        grade_or_year: gradeOrYear.trim(),
         country: country.trim() || 'South Africa',
-        birth_year: birthYear.trim() ? Number(birthYear.trim()) : null,
         profile_completed: true,
       })
       .eq('id', data.user.id);
@@ -123,21 +121,6 @@ export default function Register() {
         onChangeText={setPassword}
         error={errors.password}
         secureTextEntry
-      />
-      <FormField
-        label="Birth year (optional)"
-        value={birthYear}
-        onChangeText={setBirthYear}
-        error={errors.birthYear}
-        keyboardType="number-pad"
-        maxLength={4}
-      />
-      <FormField
-        label="Grade or year of study"
-        value={gradeOrYear}
-        onChangeText={setGradeOrYear}
-        error={errors.gradeOrYear}
-        placeholder="e.g. Grade 10, 1st year"
       />
       <FormField label="Country" value={country} onChangeText={setCountry} />
 

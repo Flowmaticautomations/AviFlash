@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "AV Flash",
+    "name": "AviFlash",
     "slug": "aviflash",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -37,7 +37,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "AV Flash needs access to your photos so you can add images to your flashcards."
+          "photosPermission": "AviFlash needs access to your photos so you can add images to your flashcards."
         }
       ]
     ]

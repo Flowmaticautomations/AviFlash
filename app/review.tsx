@@ -15,8 +15,8 @@ import { useAuth } from '../lib/auth';
 type OrderMode = 'original' | 'shuffled';
 type Phase = 'select-deck' | 'select-order' | 'reviewing' | 'results';
 
-function subjectLabel(name: string, year: string | null) {
-  return year ? `${name} ${year}` : name;
+function subjectLabel(name: string) {
+  return name;
 }
 
 function shuffle<T>(items: T[]): T[] {
@@ -58,7 +58,11 @@ export default function Review() {
   const { cards, loading: cardsLoading } = useDeckCards(selectedDeckId);
   const { session: previousSession, refresh: refreshPreviousSession } = useLastCompletedSession(selectedDeckId);
 
-  const [orderMode, setOrderMode] = useState<OrderMode>('original');
+  // Review always shuffles now -- the Original/Shuffle choice screen was
+  // removed per product decision (was confusing, shuffle is the actual
+  // desired default). orderMode is kept as a constant, not a picked value,
+  // since saveReviewSession still records which mode a session used.
+  const orderMode: OrderMode = 'shuffled';
 
   const [reviewCards, setReviewCards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,7 +83,6 @@ export default function Review() {
   function handleSelectDeck(deck: Deck) {
     setSelectedDeckId(deck.id);
     setPhase('select-order');
-    setOrderMode('original');
   }
 
   function backToDeckList() {
@@ -161,7 +164,7 @@ export default function Review() {
     return (
       <ScreenContainer>
         <ScreenTitle>Review</ScreenTitle>
-        <ScreenSubtitle>{subjectLabel(activeSubject.name, activeSubject.academic_year)}</ScreenSubtitle>
+        <ScreenSubtitle>{subjectLabel(activeSubject.name)}</ScreenSubtitle>
 
         {decksLoading ? (
           <Text style={{ color: colors.muted }}>Loading card sets…</Text>
@@ -210,29 +213,7 @@ export default function Review() {
         ) : cards.length === 0 ? (
           <Banner kind="info">This card set has no cards yet — add some from New Card first.</Banner>
         ) : (
-          <>
-            <Text style={[styles.sectionHeading, { color: colors.text }]}>Review order</Text>
-            <Pressable
-              onPress={() => setOrderMode('original')}
-              style={[
-                styles.optionRow,
-                { borderColor: orderMode === 'original' ? colors.tint : colors.border, backgroundColor: colors.card },
-              ]}
-            >
-              <Text style={{ color: colors.text }}>{orderMode === 'original' ? '✓ ' : ''}Original order</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setOrderMode('shuffled')}
-              style={[
-                styles.optionRow,
-                { borderColor: orderMode === 'shuffled' ? colors.tint : colors.border, backgroundColor: colors.card },
-              ]}
-            >
-              <Text style={{ color: colors.text }}>{orderMode === 'shuffled' ? '✓ ' : ''}Shuffle order</Text>
-            </Pressable>
-
-            <PrimaryButton title={`Start review (${cards.length} cards)`} onPress={handleStartReview} />
-          </>
+          <PrimaryButton title={`Start review (${cards.length} cards)`} onPress={handleStartReview} />
         )}
 
         <Pressable onPress={backToDeckList} style={{ marginTop: 16 }}>
@@ -384,17 +365,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     gap: 6,
-  },
-  sectionHeading: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  optionRow: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
   },
   cardLabel: {
     fontSize: 12,

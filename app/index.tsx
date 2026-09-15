@@ -18,7 +18,7 @@ export default function Welcome() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={[styles.title, { color: colors.text }]}>Welcome to AV Flash</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Welcome to AviFlash</Text>
         <Text style={[styles.tagline, { color: colors.muted }]}>
           The smart study companion designed to help you learn, revise and achieve your best.
         </Text>

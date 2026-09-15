@@ -16,8 +16,31 @@ interface ImageGalleryProps {
 export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryProps) {
   const colors = useThemeColors();
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Tracks images whose signedUrl resolved but the actual native image load
+  // still failed (bad/expired token, network blip, etc.) -- previously
+  // indistinguishable from "no image" since a failed <Image> load just
+  // renders nothing, silently, at the given box size. Logged too, so a real
+  // device test has something concrete to report back.
+  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
+
+  function markFailed(imageId: string, reason?: string) {
+    console.error('ImageGallery: image failed to load', imageId, reason);
+    setFailedIds((prev) => {
+      const next = new Set(prev);
+      next.add(imageId);
+      return next;
+    });
+  }
 
   if (images.length === 0) return null;
+
+  // onRemove is only passed in edit mode (View Cards' edit form) -- that's
+  // the only place a failed image is actually actionable, so only tell the
+  // user to remove it there. In read-only views (View Cards browsing,
+  // Review) there's no remove control on screen to point them at.
+  const failureMessage = onRemove
+    ? 'Could not load this image. Remove it below and add a new one.'
+    : 'Could not load this image. Edit this card to remove and replace it.';
 
   return (
     <View style={styles.wrap}>
@@ -35,11 +58,17 @@ export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryP
           {images.map((image) => (
             <View key={image.id} style={styles.thumbWrap}>
               <Pressable onPress={() => setPreviewOpen(true)}>
-                {image.signedUrl ? (
-                  <Image source={{ uri: image.signedUrl }} style={[styles.thumb, { borderColor: colors.border }]} />
+                {image.signedUrl && !failedIds.has(image.id) ? (
+                  <Image
+                    source={{ uri: image.signedUrl }}
+                    style={[styles.thumb, { borderColor: colors.border }]}
+                    onError={(e) => markFailed(image.id, e.nativeEvent?.error)}
+                  />
                 ) : (
                   <View style={[styles.thumb, styles.thumbPlaceholder, { borderColor: colors.border }]}>
-                    <Text style={{ color: colors.muted, fontSize: 10 }}>…</Text>
+                    <Text style={{ color: colors.muted, fontSize: 10 }}>
+                      {failedIds.has(image.id) ? '⚠' : '…'}
+                    </Text>
                   </View>
                 )}
               </Pressable>
@@ -64,9 +93,21 @@ export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryP
             <Text style={[styles.modalTitle, { color: colors.text }]}>{label}</Text>
             <ScrollView>
               {images.map((image) =>
-                image.signedUrl ? (
-                  <Image key={image.id} source={{ uri: image.signedUrl }} style={styles.fullImage} resizeMode="contain" />
-                ) : null
+                image.signedUrl && !failedIds.has(image.id) ? (
+                  <Image
+                    key={image.id}
+                    source={{ uri: image.signedUrl }}
+                    style={styles.fullImage}
+                    resizeMode="contain"
+                    onError={(e) => markFailed(image.id, e.nativeEvent?.error)}
+                  />
+                ) : (
+                  <View key={image.id} style={[styles.fullImage, styles.thumbPlaceholder, { borderWidth: 1, borderColor: colors.border }]}>
+                    <Text style={{ color: colors.muted, textAlign: 'center', paddingHorizontal: 16 }}>
+                      {failureMessage}
+                    </Text>
+                  </View>
+                )
               )}
             </ScrollView>
             <Pressable

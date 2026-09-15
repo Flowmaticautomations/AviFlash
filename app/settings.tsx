@@ -4,12 +4,18 @@ import { ScreenContainer, ScreenSubtitle, ScreenTitle, SecondaryButton } from '.
 import { useThemeColors } from '../hooks/useThemeColors';
 import { useAuth } from '../lib/auth';
 
+// Label above value, not side-by-side -- a side-by-side row with no width
+// limit on the value clips long content (a real email address in
+// particular has no natural break point, so it just ran off the edge of
+// the card instead of wrapping).
 function InfoRow({ label, value }: { label: string; value: string }) {
   const colors = useThemeColors();
   return (
     <View style={styles.infoRow}>
       <Text style={[styles.infoLabel, { color: colors.muted }]}>{label}</Text>
-      <Text style={[styles.infoValue, { color: colors.text }]}>{value || '—'}</Text>
+      <Text style={[styles.infoValue, { color: colors.text }]} selectable>
+        {value || '—'}
+      </Text>
     </View>
   );
 }
@@ -29,7 +35,6 @@ export default function Settings() {
         <InfoRow label="Name" value={[profile?.first_name, profile?.surname].filter(Boolean).join(' ')} />
         <InfoRow label="Email" value={profile?.email ?? ''} />
         <InfoRow label="Phone" value={profile?.phone ?? ''} />
-        <InfoRow label="Grade / year" value={profile?.grade_or_year ?? ''} />
         <InfoRow label="Country" value={profile?.country ?? ''} />
       </View>
 
@@ -53,14 +58,16 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 2,
   },
   infoLabel: {
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   infoValue: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '600',
+    flexWrap: 'wrap',
   },
 });
