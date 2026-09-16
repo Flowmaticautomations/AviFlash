@@ -28,7 +28,6 @@ export default function ViewCards() {
 
   const {
     decks,
-    cardCounts,
     loading: decksLoading,
     refresh: refreshDecks,
     renameDeck,
@@ -160,10 +159,10 @@ export default function ViewCards() {
   if (!activeSubject) {
     return (
       <ScreenContainer>
-        <ScreenTitle>View Cards</ScreenTitle>
+        <ScreenTitle>Manage Cards</ScreenTitle>
         <ScreenSubtitle>You need an active subject to view its card sets.</ScreenSubtitle>
         <Banner kind="info">Select or create a subject first, then come back here.</Banner>
-        <PrimaryButton title="Manage subjects" onPress={() => router.push('/subjects')} />
+        <PrimaryButton title="Manage Subjects" onPress={() => router.push('/subjects')} />
       </ScreenContainer>
     );
   }
@@ -176,7 +175,7 @@ export default function ViewCards() {
 
   return (
     <ScreenContainer>
-      <ScreenTitle>View Cards</ScreenTitle>
+      <ScreenTitle>Manage Cards</ScreenTitle>
       <ScreenSubtitle>{subjectLabel(activeSubject.name)}</ScreenSubtitle>
 
       {!selectedDeck ? (
@@ -202,9 +201,6 @@ export default function ViewCards() {
                 style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}
               >
                 <Text style={{ color: colors.text, fontWeight: '600' }}>{deck.name}</Text>
-                <Text style={{ color: colors.muted, fontSize: 13, marginTop: 2 }}>
-                  {cardCounts[deck.id] ?? 0} card{(cardCounts[deck.id] ?? 0) === 1 ? '' : 's'}
-                </Text>
               </Pressable>
             ))
           )}
@@ -267,13 +263,6 @@ export default function ViewCards() {
             ) : (
               <>
                 <Text style={[styles.sectionHeading, { color: colors.text }]}>{selectedDeck.name}</Text>
-                <Text style={{ color: colors.muted, fontSize: 13 }}>
-                  {/* cards.length (from useDeckCards, scoped to this deck) rather than
-                      cardCounts (from useDecks' list-level fetch) — the latter only
-                      updates on a decks refresh, so it goes stale immediately after
-                      editing/archiving a card here. Found by testing, not designed in. */}
-                  {cards.length} card(s)
-                </Text>
                 <View style={styles.actionsRow}>
                   <Pressable
                     onPress={startRenameDeck}
@@ -339,7 +328,7 @@ export default function ViewCards() {
       )}
 
       <Pressable onPress={() => router.push('/dashboard')} style={{ marginTop: 16 }}>
-        <Text style={{ color: colors.muted, textAlign: 'center' }}>Back to dashboard</Text>
+        <Text style={{ color: colors.muted, textAlign: 'center' }}>Back to Dashboard</Text>
       </Pressable>
     </ScreenContainer>
   );

@@ -38,7 +38,7 @@ export default function Settings() {
         <InfoRow label="Country" value={profile?.country ?? ''} />
       </View>
 
-      <SecondaryButton title="Manage subjects" onPress={() => router.push('/subjects')} />
+      <SecondaryButton title="Manage Subjects" onPress={() => router.push('/subjects')} />
       <SecondaryButton title="Log out" onPress={() => signOut()} />
     </ScreenContainer>
   );

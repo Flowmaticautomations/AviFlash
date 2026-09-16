@@ -5,6 +5,7 @@ import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from '../constants/theme';
 import { ActiveSubjectProvider } from '../hooks/useActiveSubject';
+import { SubjectsProvider } from '../hooks/useSubjects';
 import { AuthProvider, useAuth } from '../lib/auth';
 
 const PUBLIC_ROUTES = ['index', 'register', 'login', 'forgot-password'];
@@ -72,9 +73,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
-        <ActiveSubjectProvider>
-          <RootNavigator />
-        </ActiveSubjectProvider>
+        <SubjectsProvider>
+          <ActiveSubjectProvider>
+            <RootNavigator />
+          </ActiveSubjectProvider>
+        </SubjectsProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

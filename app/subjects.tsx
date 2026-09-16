@@ -77,7 +77,7 @@ export default function Subjects() {
 
       <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <Text style={[styles.cardHeading, { color: colors.text }]}>Add a subject</Text>
-        <FormField label="Name" value={newName} onChangeText={setNewName} placeholder="e.g. Geography" />
+        <FormField label="Name" value={newName} onChangeText={setNewName} placeholder="e.g. Mathematics - 2026" />
         <PrimaryButton title="Add subject" onPress={handleCreate} loading={creating} />
       </View>
 
@@ -157,7 +157,7 @@ export default function Subjects() {
       )}
 
       <Pressable onPress={() => router.back()} style={{ marginTop: 16 }}>
-        <Text style={{ color: colors.tint, textAlign: 'center', fontWeight: '600' }}>Back to dashboard</Text>
+        <Text style={{ color: colors.tint, textAlign: 'center', fontWeight: '600' }}>Back to Dashboard</Text>
       </Pressable>
     </ScreenContainer>
   );

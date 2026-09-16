@@ -229,7 +229,7 @@ export default function NewCard() {
         <ScreenTitle>New Card</ScreenTitle>
         <ScreenSubtitle>You need an active subject before you can create a card set.</ScreenSubtitle>
         <Banner kind="info">Select or create a subject first, then come back here.</Banner>
-        <PrimaryButton title="Manage subjects" onPress={() => router.push('/subjects')} />
+        <PrimaryButton title="Manage Subjects" onPress={() => router.push('/subjects')} />
       </ScreenContainer>
     );
   }
@@ -349,7 +349,7 @@ export default function NewCard() {
           ) : (
             <Pressable onPress={() => guardedNavigate('/dashboard')} style={{ marginTop: 16 }}>
               <Text style={{ color: colors.muted, textAlign: 'center' }}>
-                {confirmingLeave ? 'Tap again to leave without saving' : 'Cancel and return to dashboard'}
+                {confirmingLeave ? 'Tap again to leave without saving' : 'Back to Dashboard'}
               </Text>
             </Pressable>
           )}

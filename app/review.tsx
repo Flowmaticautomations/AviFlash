@@ -155,7 +155,7 @@ export default function Review() {
         <ScreenTitle>Review</ScreenTitle>
         <ScreenSubtitle>You need an active subject before you can start a review.</ScreenSubtitle>
         <Banner kind="info">Select or create a subject first, then come back here.</Banner>
-        <PrimaryButton title="Manage subjects" onPress={() => router.push('/subjects')} />
+        <PrimaryButton title="Manage Subjects" onPress={() => router.push('/subjects')} />
       </ScreenContainer>
     );
   }
@@ -189,7 +189,7 @@ export default function Review() {
         )}
 
         <Pressable onPress={() => router.push('/dashboard')} style={{ marginTop: 16 }}>
-          <Text style={{ color: colors.muted, textAlign: 'center' }}>Back to dashboard</Text>
+          <Text style={{ color: colors.muted, textAlign: 'center' }}>Back to Dashboard</Text>
         </Pressable>
       </ScreenContainer>
     );
@@ -344,7 +344,7 @@ export default function Review() {
         </View>
 
         <PrimaryButton title="Review again" onPress={handleReviewAgain} />
-        <SecondaryButton title="Back to dashboard" onPress={() => router.push('/dashboard')} />
+        <SecondaryButton title="Back to Dashboard" onPress={() => router.push('/dashboard')} />
       </ScreenContainer>
     );
   }
