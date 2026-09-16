@@ -56,7 +56,7 @@ export function FormField({
   const colors = useThemeColors();
   return (
     <View style={styles.fieldWrap}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      {label ? <Text style={[styles.label, { color: colors.text }]}>{label}</Text> : null}
       <TextInput
         placeholderTextColor={colors.muted}
         style={[
