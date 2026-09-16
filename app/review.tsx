@@ -213,7 +213,7 @@ export default function Review() {
         ) : cards.length === 0 ? (
           <Banner kind="info">This card set has no cards yet — add some from New Card first.</Banner>
         ) : (
-          <PrimaryButton title={`Start review (${cards.length} cards)`} onPress={handleStartReview} />
+          <PrimaryButton title={`Start Review (${cards.length} cards)`} onPress={handleStartReview} />
         )}
 
         <Pressable onPress={backToDeckList} style={{ marginTop: 16 }}>
@@ -285,7 +285,7 @@ export default function Review() {
 
         <Pressable onPress={() => guardedLeaveReview(backToDeckList)} style={{ marginTop: 16 }}>
           <Text style={{ color: colors.muted, textAlign: 'center' }}>
-            {confirmingLeave ? 'Tap again to leave without saving' : 'Cancel review'}
+            {confirmingLeave ? 'Tap again to leave without saving' : 'Cancel Review'}
           </Text>
         </Pressable>
       </ScreenContainer>
@@ -299,8 +299,8 @@ export default function Review() {
 
     return (
       <ScreenContainer>
-        <ScreenTitle>Review complete</ScreenTitle>
-        <ScreenSubtitle>{selectedDeck.name}</ScreenSubtitle>
+        <ScreenTitle>Review Complete</ScreenTitle>
+        <Text style={[styles.completedDeckName, { color: colors.text }]}>{selectedDeck.name}</Text>
 
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
           <View style={styles.statRow}>
@@ -397,7 +397,14 @@ const styles = StyleSheet.create({
   },
   statRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    columnGap: 12,
     paddingVertical: 2,
+  },
+  completedDeckName: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 12,
   },
 });

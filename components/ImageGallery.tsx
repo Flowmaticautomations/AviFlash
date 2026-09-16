@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useThemeColors } from '../hooks/useThemeColors';
 import type { CardImageWithUrl } from '../hooks/useCardImages';
 
@@ -16,6 +16,7 @@ interface ImageGalleryProps {
 export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryProps) {
   const colors = useThemeColors();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState(0);
   // Tracks images whose signedUrl resolved but the actual native image load
   // still failed (bad/expired token, network blip, etc.) -- previously
   // indistinguishable from "no image" since a failed <Image> load just
@@ -34,6 +35,16 @@ export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryP
 
   if (images.length === 0) return null;
 
+  function openModalAt(index: number) {
+    setModalIndex(index);
+    setPreviewOpen(true);
+  }
+
+  // Clamped, not a direct index: images can shrink out from under an open
+  // modal (a remove elsewhere triggering a refresh) -- this avoids reading
+  // past the end and crashing on `current.signedUrl`.
+  const current = images[modalIndex] ?? images[images.length - 1];
+
   // onRemove is only passed in edit mode (View Cards' edit form) -- that's
   // the only place a failed image is actually actionable, so only tell the
   // user to remove it there. In read-only views (View Cards browsing,
@@ -46,18 +57,16 @@ export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryP
     <View style={styles.wrap}>
       {variant === 'button' ? (
         <Pressable
-          onPress={() => setPreviewOpen(true)}
+          onPress={() => openModalAt(0)}
           style={[styles.viewButton, { borderColor: colors.border, backgroundColor: colors.card }]}
         >
-          <Text style={{ color: colors.tint, fontWeight: '600' }}>
-            View {label} ({images.length})
-          </Text>
+          <Text style={{ color: colors.tint, fontWeight: '600' }}>View Image</Text>
         </Pressable>
       ) : (
         <View style={styles.thumbRow}>
-          {images.map((image) => (
+          {images.map((image, index) => (
             <View key={image.id} style={styles.thumbWrap}>
-              <Pressable onPress={() => setPreviewOpen(true)}>
+              <Pressable onPress={() => openModalAt(index)}>
                 {image.signedUrl && !failedIds.has(image.id) ? (
                   <Image
                     source={{ uri: image.signedUrl }}
@@ -91,25 +100,48 @@ export function ImageGallery({ images, label, variant, onRemove }: ImageGalleryP
               bubble up to the backdrop's dismiss handler. */}
           <Pressable style={[styles.modalCard, { backgroundColor: colors.background }]} onPress={() => {}}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>{label}</Text>
-            <ScrollView>
-              {images.map((image) =>
-                image.signedUrl && !failedIds.has(image.id) ? (
-                  <Image
-                    key={image.id}
-                    source={{ uri: image.signedUrl }}
-                    style={styles.fullImage}
-                    resizeMode="contain"
-                    onError={(e) => markFailed(image.id, e.nativeEvent?.error)}
-                  />
-                ) : (
-                  <View key={image.id} style={[styles.fullImage, styles.thumbPlaceholder, { borderWidth: 1, borderColor: colors.border }]}>
-                    <Text style={{ color: colors.muted, textAlign: 'center', paddingHorizontal: 16 }}>
-                      {failureMessage}
-                    </Text>
-                  </View>
-                )
+
+            <View style={styles.imageStage}>
+              {images.length > 1 ? (
+                <Pressable
+                  onPress={() => setModalIndex((i) => (i - 1 + images.length) % images.length)}
+                  style={[styles.navButton, styles.navButtonLeft]}
+                >
+                  <Text style={styles.navButtonText}>‹</Text>
+                </Pressable>
+              ) : null}
+
+              {current.signedUrl && !failedIds.has(current.id) ? (
+                <Image
+                  source={{ uri: current.signedUrl }}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                  onError={(e) => markFailed(current.id, e.nativeEvent?.error)}
+                />
+              ) : (
+                <View style={[styles.fullImage, styles.thumbPlaceholder, { borderWidth: 1, borderColor: colors.border }]}>
+                  <Text style={{ color: colors.muted, textAlign: 'center', paddingHorizontal: 16 }}>
+                    {failureMessage}
+                  </Text>
+                </View>
               )}
-            </ScrollView>
+
+              {images.length > 1 ? (
+                <Pressable
+                  onPress={() => setModalIndex((i) => (i + 1) % images.length)}
+                  style={[styles.navButton, styles.navButtonRight]}
+                >
+                  <Text style={styles.navButtonText}>›</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            {images.length > 1 ? (
+              <Text style={[styles.imageCount, { color: colors.muted }]}>
+                {modalIndex + 1} / {images.length}
+              </Text>
+            ) : null}
+
             <Pressable
               onPress={() => setPreviewOpen(false)}
               style={[styles.closeButton, { backgroundColor: colors.tint }]}
@@ -185,11 +217,45 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
+  imageStage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
   fullImage: {
     width: '100%',
     height: 320,
-    marginBottom: 12,
     borderRadius: 8,
+  },
+  navButton: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  navButtonLeft: {
+    left: 4,
+  },
+  navButtonRight: {
+    right: 4,
+  },
+  navButtonText: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 24,
+  },
+  imageCount: {
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 8,
+    marginBottom: 4,
   },
   closeButton: {
     borderRadius: 10,
