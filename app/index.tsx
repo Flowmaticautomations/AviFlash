@@ -20,7 +20,7 @@ export default function Welcome() {
         />
         <Text style={[styles.title, { color: colors.text }]}>Welcome to AviFlash</Text>
         <Text style={[styles.tagline, { color: colors.muted }]}>
-          The smart study companion designed to help you learn, revise and achieve your best.
+          The smart study companion that uses spaced repetition to help you learn, revise and achieve your best.
         </Text>
         <Text style={[styles.quote, { color: colors.tint }]}>&ldquo;{quote}&rdquo;</Text>
         <View style={[styles.trialPill, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: '700',
     textAlign: 'center',
   },
