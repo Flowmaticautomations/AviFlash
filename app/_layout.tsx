@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Colors } from '../constants/theme';
 import { ActiveSubjectProvider } from '../hooks/useActiveSubject';
 import { SubjectsProvider } from '../hooks/useSubjects';
+import { ThemeProvider, useTheme } from '../hooks/useTheme';
 import { AuthProvider, useAuth } from '../lib/auth';
 
 const PUBLIC_ROUTES = ['index', 'register', 'login', 'forgot-password'];
@@ -17,8 +17,7 @@ const PUBLIC_ROUTES = ['index', 'register', 'login', 'forgot-password'];
 const GUARD_EXEMPT_ROUTES = ['auth-callback', 'reset-password'];
 
 function RootNavigator() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const { themeName, colors } = useTheme();
   const { loading, session, profile, access } = useAuth();
   const router = useRouter();
   const segments = useSegments();
@@ -49,35 +48,45 @@ function RootNavigator() {
     }
   }, [loading, session, profile, access, currentRoute, router]);
 
+  // Midnight is the only dark-background theme of the three -- its status
+  // bar needs light icons, the other two need dark ones.
+  const statusBarStyle = themeName === 'midnight' ? 'light' : 'dark';
+
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.tint} size="large" />
-      </View>
+      <>
+        <StatusBar style={statusBarStyle} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+          <ActivityIndicator color={colors.tint} size="large" />
+        </View>
+      </>
     );
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-      }}
-    />
+    <>
+      <StatusBar style={statusBarStyle} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      />
+    </>
   );
 }
 
 export default function RootLayout() {
-  const scheme = useColorScheme();
   return (
     <SafeAreaProvider>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
-        <SubjectsProvider>
-          <ActiveSubjectProvider>
-            <RootNavigator />
-          </ActiveSubjectProvider>
-        </SubjectsProvider>
+        <ThemeProvider>
+          <SubjectsProvider>
+            <ActiveSubjectProvider>
+              <RootNavigator />
+            </ActiveSubjectProvider>
+          </SubjectsProvider>
+        </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
